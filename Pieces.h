@@ -3,6 +3,7 @@
 #include "Position.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 //♚ ♛ ♜ ♝ ♞ 
 
@@ -34,7 +35,7 @@ public:
         else return "yellow";
     }
     
-    virtual std::vector<position> determinemovement(const std::vector<std::vector<Piece *>> &board);
+    virtual std::vector<position> determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board);
 };
 
 class Rook : virtual public Piece{
@@ -43,7 +44,7 @@ public:
         :Piece(){symbol="♜";}
     Rook(std::string d_color, position p)
         :Piece(d_color, p){symbol="♜";}
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;
     
 };
 
@@ -53,7 +54,7 @@ public:
         :Piece(){symbol="♝";}
     Bishop(std::string d_color, position p)
         :Piece(d_color, p){symbol="♝";}
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;  
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;  
 };
 
 class Horse : public Piece{
@@ -62,7 +63,7 @@ public:
         :Piece(){symbol="♞";}
     Horse(std::string d_color, position p)
         :Piece(d_color, p){symbol="♞";}
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;  
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;  
 };
 
 class Queen : public Rook, public Bishop{
@@ -71,7 +72,7 @@ public:
         :Piece(){symbol="♛";}
     Queen(std::string d_color, position p)
         :Piece(d_color, p){symbol="♛";}
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;  
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;  
 };
 
 class King : public Piece{
@@ -80,8 +81,8 @@ public:
         :Piece(){symbol="♚";}
     King(std::string d_color, position p)
         :Piece(d_color, p){symbol="♚";}
-    std::vector<position> illegal_moves_for_king (const std::vector<std::vector<Piece *>> &board);
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;  
+    std::vector<position> illegal_moves_for_king (const std::vector<std::vector<std::unique_ptr<Piece>>> &board);
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;  
 };
 
 class Pawn : public Piece{
@@ -90,7 +91,7 @@ public:
         :Piece(){symbol="♟"; has_just_moved_2_spaces=false;}
     Pawn(std::string d_color, position p)
         :Piece(d_color, p){symbol="♟";}
-    virtual std::vector<position> determinemovement (const std::vector<std::vector<Piece *>> &board) override;  
+    virtual std::vector<position> determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board) override;  
 };
 
 #endif

@@ -4,10 +4,10 @@
 #include <vector>
 #include <algorithm>
 
-std::vector<position> Piece::determinemovement(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Piece::determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     return {};
 }
-std::vector<position> Rook::determinemovement(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Rook::determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves;
     int difference=0;
     bool blocked_up=false, blocked_down=false, blocked_left=false, blocked_right=false;
@@ -57,7 +57,7 @@ std::vector<position> Rook::determinemovement(const std::vector<std::vector<Piec
     return moves;
 }
 
-std::vector<position> Bishop::determinemovement(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Bishop::determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves;
     int difference=0;
     bool blocked_up_left=false, blocked_up_right=false, blocked_down_left=false, blocked_down_right=false;
@@ -107,7 +107,7 @@ std::vector<position> Bishop::determinemovement(const std::vector<std::vector<Pi
     return moves;
 }
 
-std::vector<position> Horse::determinemovement (const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Horse::determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves;
     std::vector<position> potential_moves = {
         {pos.x + 2, pos.y + 1}, {pos.x + 2, pos.y - 1},
@@ -123,19 +123,19 @@ std::vector<position> Horse::determinemovement (const std::vector<std::vector<Pi
     return moves;
 }
 
-std::vector<position> Queen::determinemovement(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Queen::determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves {Rook::determinemovement(board)};
     std::vector<position> bishop_moves {Bishop::determinemovement(board)};
     moves.insert(moves.end(), bishop_moves.begin(), bishop_moves.end());
     return moves;
 }
 
-std::vector<position> King::illegal_moves_for_king(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> King::illegal_moves_for_king(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> cant_move{};
     std::vector<position> cant_move_append{};
     std::string color_name = get_color_string();
-    for (auto i : board)
-        for (auto j : i){
+    for (const auto& i : board)
+        for (const auto& j : i){
             if (j->get_color_string() != color_name){    
                 if (j->get_symbol() == "♚"){
                     position pk = j->get_position();
@@ -165,7 +165,7 @@ std::vector<position> King::illegal_moves_for_king(const std::vector<std::vector
     return cant_move;
 }
 
-std::vector<position> King::determinemovement(const std::vector<std::vector<Piece *>> &board){
+std::vector<position> King::determinemovement(const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves {{pos.x-1, pos.y-1}, {pos.x, pos.y-1}, {pos.x+1, pos.y-1}, {pos.x-1, pos.y}, {pos.x+1, pos.y}, {pos.x-1, pos.y+1}, {pos.x, pos.y+1}, {pos.x+1, pos.y+1}};
     std::vector<position> cant_move{illegal_moves_for_king(board)};
     for (int i=moves.size()-1; i>=0; i--)
@@ -177,7 +177,7 @@ std::vector<position> King::determinemovement(const std::vector<std::vector<Piec
     return moves;
 }
 
-std::vector<position> Pawn::determinemovement (const std::vector<std::vector<Piece *>> &board){
+std::vector<position> Pawn::determinemovement (const std::vector<std::vector<std::unique_ptr<Piece>>> &board){
     std::vector<position> moves;
     int y_move_value=0;
     std::string my_color{get_color_string()};
