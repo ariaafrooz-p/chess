@@ -6,95 +6,72 @@
 #include <vector>
 #include <algorithm>
 Board::Board()
-    :board{
-        // Row 0 (y=0): Black major pieces
-        { new Rook{"black", {0,0}},   new Horse{"black", {1,0}}, new Bishop{"black", {2,0}}, new Queen{"black", {3,0}}, 
-          new King{"black", {4,0}},   new Bishop{"black", {5,0}}, new Horse{"black", {6,0}}, new Rook{"black", {7,0}} },
-        
-        // Row 1 (y=1): Black pawns
-        { new Pawn{"black", {0,1}},   new Pawn{"black", {1,1}},   new Pawn{"black", {2,1}},   new Pawn{"black", {3,1}}, 
-          new Pawn{"black", {4,1}},   new Pawn{"black", {5,1}},   new Pawn{"black", {6,1}},   new Pawn{"black", {7,1}} },
+        : board(8){
+        for (int x = 0; x < 8; ++x) {
+            std::unique_ptr<Piece> black_major;
+            if (x == 0 || x == 7) black_major = std::make_unique<Rook>("black", position{x, 0});
+            else if (x == 1 || x == 6) black_major = std::make_unique<Horse>("black", position{x, 0});
+            else if (x == 2 || x == 5) black_major = std::make_unique<Bishop>("black", position{x, 0});
+            else if (x == 3) black_major = std::make_unique<Queen>("black", position{x, 0});
+            else black_major = std::make_unique<King>("black", position{x, 0});
+            board[0].push_back(std::move(black_major));
+                board[1].push_back(std::make_unique<Pawn>("black", position{x, 1}));
+                for (int y = 2; y <= 5; ++y)
+                        board[y].push_back(std::make_unique<Piece>(position{x, y}));
+                board[6].push_back(std::make_unique<Pawn>("white", position{x, 6}));
+                std::unique_ptr<Piece> white_major;
+                if (x == 0 || x == 7) white_major = std::make_unique<Rook>("white", position{x, 7});
+                else if (x == 1 || x == 6) white_major = std::make_unique<Horse>("white", position{x, 7});
+                else if (x == 2 || x == 5) white_major = std::make_unique<Bishop>("white", position{x, 7});
+                else if (x == 3) white_major = std::make_unique<Queen>("white", position{x, 7});
+                else white_major = std::make_unique<King>("white", position{x, 7});
+                board[7].push_back(std::move(white_major));
+        }
+}
 
-        // Row 2 (y=2): Empty squares
-        { new Piece{{0,2}}, new Piece{{1,2}}, new Piece{{2,2}}, new Piece{{3,2}}, 
-          new Piece{{4,2}}, new Piece{{5,2}}, new Piece{{6,2}}, new Piece{{7,2}} },
-
-        // Row 3 (y=3): Empty squares
-        { new Piece{{0,3}}, new Piece{{1,3}}, new Piece{{2,3}}, new Piece{{3,3}}, 
-          new Piece{{4,3}}, new Piece{{5,3}}, new Piece{{6,3}}, new Piece{{7,3}} },
-
-        // Row 4 (y=4): Empty squares
-        { new Piece{{0,4}}, new Piece{{1,4}}, new Piece{{2,4}}, new Piece{{3,4}}, 
-          new Piece{{4,4}}, new Piece{{5,4}}, new Piece{{6,4}}, new Piece{{7,4}} },
-
-        // Row 5 (y=5): Empty squares
-        { new Piece{{0,5}}, new Piece{{1,5}}, new Piece{{2,5}}, new Piece{{3,5}}, 
-          new Piece{{4,5}}, new Piece{{5,5}}, new Piece{{6,5}}, new Piece{{7,5}} },
-
-        // Row 6 (y=6): White pawns
-        { new Pawn{"white", {0,6}},   new Pawn{"white", {1,6}},   new Pawn{"white", {2,6}},   new Pawn{"white", {3,6}}, 
-          new Pawn{"white", {4,6}},   new Pawn{"white", {5,6}},   new Pawn{"white", {6,6}},   new Pawn{"white", {7,6}} },
-
-        // Row 7 (y=7): White major pieces
-        { new Rook{"white", {0,7}},   new Horse{"white", {1,7}}, new Bishop{"white", {2,7}}, new Queen{"white", {3,7}}, 
-          new King{"white", {4,7}},   new Bishop{"white", {5,7}}, new Horse{"white", {6,7}}, new Rook{"white", {7,7}} }
-    }{}
-
-Board::Board(Piece *p){
+Board::Board(std::unique_ptr<Piece> p){
     //initializing 
     for (int i = 0; i < 8; i++) {
-        std::vector<Piece *> row;
+        std::vector<std::unique_ptr<Piece>> row;
         for (int j = 0; j < 8; j++) {
-            row.push_back(new Piece{{j, i}});
+            row.push_back(std::make_unique<Piece>(position{j, i}));
         }
-        board.push_back(row);
+        board.push_back(std::move(row));
     }
 
     position pos = p->get_position();
     if (pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8) {
-        delete board[pos.y][pos.x];
-        board[pos.y][pos.x] = p;
+        board[pos.y][pos.x] = std::move(p);
     } else {
-        delete p;
         display_message("Error: Position out of bounds. Piece not placed.");
     }
 }
 
-Board::Board(std::vector<Piece *> ps){
+Board::Board(std::vector<std::unique_ptr<Piece>> ps){
     //initializing 
     for (int i = 0; i < 8; i++) {
-        std::vector<Piece *> row;
+        std::vector<std::unique_ptr<Piece>> row;
         for (int j = 0; j < 8; j++) {
-            row.push_back(new Piece{{j, i}});
+            row.push_back(std::make_unique<Piece>(position{j, i}));
         }
-        board.push_back(row);
+        board.push_back(std::move(row));
     }
 
-    for (auto p : ps) {
+    for (auto& p : ps) {
         position pos = p->get_position();
         if (pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8) {
-            delete board[pos.y][pos.x];
-            board[pos.y][pos.x] = p;
+            board[pos.y][pos.x] = std::move(p);
         } else {
-            delete p;
             display_message("Error: Position out of bounds. Piece not selected.");
-        }
-    }
-}
-
-Board::~Board(){
-    for (auto &i : board) {
-        for (auto &j : i) {
-            delete j; // Free the memory allocated for each Piece
         }
     }
 }
 
 void Board::print_board() const {
     std::cout << "\033[2J\033[1;1H"; //clear screen and move to top left
-    for (auto i : board){
+    for (const auto& i : board){
         std::cout << "-------------------------" << std::endl;
-        for (auto j : i)
+        for (const auto& j : i)
             std::cout << "|" << *j << " ";
         std::cout << "|" << std::endl;
     }
@@ -160,52 +137,49 @@ void Board::select_piece(position pos) {
 }
 
 bool Board::move_piece(position from, position to){
-    Piece *moving_piece = board.at(from.y).at(from.x);
-    Piece *target_piece = board.at(to.y).at(to.x);
-    Piece *temp=board.at(to.y).at(to.x);
+    auto moving_piece = std::move(board.at(from.y).at(from.x));
+    auto captured_piece = std::move(board.at(to.y).at(to.x));
     // if (board.at(from.y).at(from.x)->get_symbol() == "♟" && board.at(to.y).at(to.x)->get_symbol() == " " && abs(from.x-to.x) == 1){
     //     delete board.at(from.y).at(to.x);
     //     board.at(from.y).at(to.x) = new Piece{{to.x, from.y}};
     // }
-    board.at(to.y).at(to.x) = board.at(from.y).at(from.x);
-    board.at(from.y).at(from.x) = new Piece{{from.x, from.y}};
+    board.at(to.y).at(to.x) = std::move(moving_piece);
+    board.at(from.y).at(from.x) = std::make_unique<Piece>(position{from.x, from.y});
     board.at(to.y).at(to.x)->set_position(to);
     if (is_incheck(turn)){
-        delete board.at(from.y).at(from.x);
-        board.at(from.y).at(from.x) = board.at(to.y).at(to.x);
-        board.at(to.y).at(to.x) = temp;
+        moving_piece = std::move(board.at(to.y).at(to.x));
+        board.at(from.y).at(from.x) = std::move(moving_piece);
+        board.at(to.y).at(to.x) = std::move(captured_piece);
         board.at(from.y).at(from.x)->set_position(from);
         return false;
     }
     else{
-        delete temp;
         board.at(to.y).at(to.x)->set_position(to);
         return true;
     }
 }
 
 bool Board::can_move(position from, position to){
-    Piece *moving_piece = board.at(from.y).at(from.x);
-    Piece *target_piece = board.at(to.y).at(to.x);
-    Piece *temp=board.at(to.y).at(to.x);
+    auto moving_piece = std::move(board.at(from.y).at(from.x));
+    auto captured_piece = std::move(board.at(to.y).at(to.x));
     // if (board.at(from.y).at(from.x)->get_symbol() == "♟" && board.at(to.y).at(to.x)->get_symbol() == " " && abs(from.x-to.x) == 1){
     //     delete board.at(from.y).at(to.x);
     //     board.at(from.y).at(to.x) = new Piece{{to.x, from.y}};
     // }
-    board.at(to.y).at(to.x) = board.at(from.y).at(from.x);
-    board.at(from.y).at(from.x) = new Piece{{from.x, from.y}};
+    board.at(to.y).at(to.x) = std::move(moving_piece);
+    board.at(from.y).at(from.x) = std::make_unique<Piece>(position{from.x, from.y});
     board.at(to.y).at(to.x)->set_position(to);
     if (is_incheck(turn)){
-        delete board.at(from.y).at(from.x);
-        board.at(from.y).at(from.x) = board.at(to.y).at(to.x);
-        board.at(to.y).at(to.x) = temp;
+        moving_piece = std::move(board.at(to.y).at(to.x));
+        board.at(from.y).at(from.x) = std::move(moving_piece);
+        board.at(to.y).at(to.x) = std::move(captured_piece);
         board.at(from.y).at(from.x)->set_position(from);
         return false;
     }
     else{
-        delete board.at(from.y).at(from.x);
-        board.at(from.y).at(from.x) = board.at(to.y).at(to.x);
-        board.at(to.y).at(to.x) = temp;
+        moving_piece = std::move(board.at(to.y).at(to.x));
+        board.at(from.y).at(from.x) = std::move(moving_piece);
+        board.at(to.y).at(to.x) = std::move(captured_piece);
         board.at(from.y).at(from.x)->set_position(from);
         return true;
     }

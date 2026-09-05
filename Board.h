@@ -2,19 +2,20 @@
 #define _BOARD_H_
 #include "Pieces.h"
 #include <vector>
+#include <memory>
 
 class Board{
 private:
     position selected_piece{-1,-1};
     std::string turn="white";
-    std::vector<std::vector<Piece *>> board;
+    std::vector<std::vector<std::unique_ptr<Piece>>> board;
     bool turn_incheck=false;
 
 public:
     Board();
-    Board(Piece *p);
-    Board(std::vector<Piece *> ps);
-    ~Board();
+    Board(std::unique_ptr<Piece> p);
+    Board(std::vector<std::unique_ptr<Piece>> ps);
+    ~Board() = default;
     bool move_piece(position from, position to);
     void print_board() const;
     void select_piece(position pos);
