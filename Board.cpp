@@ -211,20 +211,6 @@ bool Board::can_move(position from, position to){
     }
 }
 
-
-
-
-// void Board::move_piece(position from, position to){
-//     // if (board.at(from.y).at(from.x)->get_symbol() == "♟" && board.at(to.y).at(to.x)->get_symbol() == " " && abs(from.x-to.x) == 1){
-//     //     delete board.at(from.y).at(to.x);
-//     //     board.at(from.y).at(to.x) = new Piece{{to.x, from.y}};
-//     // }
-//     delete board.at(to.y).at(to.x);
-//     board.at(to.y).at(to.x) = board.at(from.y).at(from.x);
-//     board.at(from.y).at(from.x) = new Piece{{from.x, from.y}};
-//     board.at(to.y).at(to.x)->set_position(to);
-// }
-
 void Board::display_message(const std::string &message) const {
     std::cout << "\033[s" << "\033[9;30H" <<message << "\033[u" << std::endl; // save position then printout message then restore position
 }
