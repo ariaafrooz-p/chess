@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
-#include "exceptions-ches.h"
+#include "exceptions-chess.h"
 #include "Input.h"
 
 Board::Board()
