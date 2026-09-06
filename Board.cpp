@@ -75,10 +75,15 @@ void Board::start_game_simulation() {
     print_board();
     Input inp{{3,16}};
     while (!is_game_over()) {
-        display_message(turn + "'s turn. Select a piece to move");
+        display_message(turn + "'s turn. Select a piece to move                                     ");
         bool flag = false;
         while (!flag) {
-            flag=select_piece(inp.get_input_keyboard());
+            try {
+                select_piece(inp.get_input_keyboard());
+                flag = true;
+            } catch (const IllegalMoveException& e) {
+                display_message(e.what());
+            }
         }
     }
     print_board();
@@ -99,13 +104,12 @@ void Board::print_board() const {
     std::cout << "-------------------------" << std::endl;
 }
 
-bool Board::select_piece(position pos) {
+void Board::select_piece(position pos) {
     if(turn == board.at(pos.y).at(pos.x)->get_color_string() && selected_piece.x == -1 && selected_piece.y == -1){
         if (pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8) {
             std::vector<position> valid_moves = board.at(pos.y).at(pos.x)->determinemovement(board);
             if (valid_moves.empty()) {
-                display_message("No valid moves for this piece. iouwgwuigfewufguwe");
-                return false;
+                throw IllegalMoveException("no valid moves for selected piece");
             } else {
                 selected_piece.x = pos.x;
                 selected_piece.y = pos.y;
@@ -118,15 +122,12 @@ bool Board::select_piece(position pos) {
                     }
                 }
             }
-            return true;
         } else {
-            return false;
-            display_message("Error: Position out of bounds.");
+            throw IllegalMoveException("Position out of bounds.");
         }
     }
     else if (turn != board.at(pos.y).at(pos.x)->get_color_string() && selected_piece.x == -1 && selected_piece.y == -1){
-        display_message("not your turn bro / not your piece bro");
-        return false;
+        throw IllegalMoveException("not your turn / not your piece");
     }
     else if (selected_piece.x != -1 && selected_piece.y != -1){
         bool flag=false;
@@ -151,17 +152,13 @@ bool Board::select_piece(position pos) {
                 turn_incheck=is_incheck(turn);
                 if (turn_incheck)
                     display_message("CHECK!");
-                return true;
             }
             else{
                 print_board();
-                display_message("there is a check present");
-                return false;
+                throw IllegalMoveException("your king is in check");
             }
         }
     }
-    std::cerr << "Error: Invalid selection." << std::endl;
-    return false;//temporary return statement will be replaced with a throw exception
 }
 
 bool Board::move_piece(position from, position to){

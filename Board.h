@@ -19,7 +19,7 @@ public:
     void start_game_simulation();
     bool move_piece(position from, position to);
     void print_board() const;
-    bool select_piece(position pos);
+    void select_piece(position pos);
     void turn_change() {turn = (turn == "white") ? "black" : "white";}
     void display_message(const std::string &message) const;
     bool is_incheck(std::string color_name);
