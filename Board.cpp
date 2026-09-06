@@ -5,6 +5,10 @@
 #include "Position.h"
 #include <vector>
 #include <algorithm>
+#include <memory>
+#include "exceptions-ches.h"
+#include "Input.h"
+
 Board::Board()
         : board(8){
         for (int x = 0; x < 8; ++x) {
@@ -67,6 +71,23 @@ Board::Board(std::vector<std::unique_ptr<Piece>> ps){
     }
 }
 
+void Board::start_game_simulation() {
+    print_board();
+    Input inp{{3,16}};
+    while (!is_game_over()) {
+        display_message(turn + "'s turn. Select a piece to move");
+        bool flag = false;
+        while (!flag) {
+            flag=select_piece(inp.get_input_keyboard());
+        }
+    }
+    print_board();
+    if (is_incheck(turn)){
+        turn_change();
+        display_message("Check Mate! " + turn + " wins!");
+    } else display_message("Stale Mate!");
+}
+
 void Board::print_board() const {
     std::cout << "\033[2J\033[1;1H"; //clear screen and move to top left
     for (const auto& i : board){
@@ -78,12 +99,13 @@ void Board::print_board() const {
     std::cout << "-------------------------" << std::endl;
 }
 
-void Board::select_piece(position pos) {
+bool Board::select_piece(position pos) {
     if(turn == board.at(pos.y).at(pos.x)->get_color_string() && selected_piece.x == -1 && selected_piece.y == -1){
         if (pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8) {
             std::vector<position> valid_moves = board.at(pos.y).at(pos.x)->determinemovement(board);
             if (valid_moves.empty()) {
-                display_message("No valid moves for this piece.");
+                display_message("No valid moves for this piece. iouwgwuigfewufguwe");
+                return false;
             } else {
                 selected_piece.x = pos.x;
                 selected_piece.y = pos.y;
@@ -96,12 +118,15 @@ void Board::select_piece(position pos) {
                     }
                 }
             }
+            return true;
         } else {
+            return false;
             display_message("Error: Position out of bounds.");
         }
     }
     else if (turn != board.at(pos.y).at(pos.x)->get_color_string() && selected_piece.x == -1 && selected_piece.y == -1){
         display_message("not your turn bro / not your piece bro");
+        return false;
     }
     else if (selected_piece.x != -1 && selected_piece.y != -1){
         bool flag=false;
@@ -122,18 +147,21 @@ void Board::select_piece(position pos) {
                 selected_piece.x = -1;
                 selected_piece.y = -1;
                 print_board();
-                turn = (turn == "white") ? "black" : "white";
+                turn_change();
                 turn_incheck=is_incheck(turn);
                 if (turn_incheck)
                     display_message("CHECK!");
+                return true;
             }
             else{
                 print_board();
                 display_message("there is a check present");
+                return false;
             }
         }
     }
-    
+    std::cerr << "Error: Invalid selection." << std::endl;
+    return false;//temporary return statement will be replaced with a throw exception
 }
 
 bool Board::move_piece(position from, position to){
